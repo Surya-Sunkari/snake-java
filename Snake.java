@@ -10,7 +10,7 @@ import javax.swing.JTextField;
 
 public class Snake implements KeyListener{
 	
-	String curDir = "right";
+	static String curDir = "right";
 	public static String[][] grid = new String[13][29];
 	
 	public static void main(String[] args) {
@@ -24,16 +24,50 @@ public class Snake implements KeyListener{
 			}
 		}
 		
-		SnakeBody head = new SnakeBody(6, 4); // maybe do randomized start location?
+		int[] randStart = getRandomCoords();
 		
-		printGrid();
+		Head head = new Head(randStart[0], randStart[1]); 
+		
+		while(true) {
+			printGrid();
+			head.move();
+			wait(500);
+		}
+		
+		
 		
 		
 		
 	}
 	
+	public static void wait(int ms)
+	{
+	    try
+	    {
+	        Thread.sleep(ms);
+	    }
+	    catch(InterruptedException ex)
+	    {
+	        Thread.currentThread().interrupt();
+	    }
+	}
+	
+	public static int[] getRandomCoords() {
+		
+		int maxRow = grid.length;
+		int maxCol = grid[0].length;
+		
+		int randRow, randCol;
+		do {
+			randRow = (int) (maxRow * Math.random());
+			randCol = (int) (maxCol * Math.random());
+		} while(!grid[randRow][randCol].equals(" "));
+		
+		return new int[] {randRow, randCol};
+	}
+	
 	public static void printGrid() {
-
+		for(int i = 0; i < 50; i++) System.out.println();
 		for(int i = 0; i < grid.length*4.4+1; i++) System.out.print("-");
 		System.out.println();
 		for(int i = 0; i < grid.length; i++) {
@@ -72,7 +106,6 @@ public class Snake implements KeyListener{
 	private void changeDirection(String newDir) {
         if(!curDir.equals(newDir)) {
         	curDir = newDir;
-        	System.out.println("now moving: " + curDir);
         }
     	
     }
@@ -95,19 +128,43 @@ class SnakeBody {
 	SnakeBody next;
 	String character;
 	
-	public SnakeBody(int row, int col) {
-		curRow = row;
-		curCol = col;
-		next = null;
-		character = "O";
-		Snake.grid[row][col] = character;
-	}
-	
 	public SnakeBody(int row, int col, SnakeBody pointer) {
 		curRow = row;
 		curCol = col;
 		next = pointer;
 		character = "#";
+	}
+	
+}
+
+class Head {
+	int curRow;
+	int curCol;
+	String character;
+	
+	public Head(int row, int col) {
+		curRow = row;
+		curCol = col;
+		character = "O";
+		Snake.grid[row][col] = character;
+	}
+	
+	public void move() {
+		String dir = Snake.curDir;
+		
+		Snake.grid[curRow][curCol] = " ";
+		
+		if(dir.equals("right")) {
+			curCol = (curCol+1)%Snake.grid[0].length;
+		} else if(dir.equals("left")) {
+			curCol = (curCol+Snake.grid[0].length-1)%Snake.grid[0].length;
+		}else if(dir.equals("up")) {
+			curRow = (curRow + Snake.grid.length-1)%Snake.grid.length;
+		}else {
+			curRow = (curRow+1)%Snake.grid.length;
+		}
+		
+		Snake.grid[curRow][curCol] = character;
 	}
 	
 }
