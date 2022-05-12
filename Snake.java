@@ -10,8 +10,10 @@ import javax.swing.JTextField;
 
 public class Snake implements KeyListener{
 	
-	static String curDir = "right";
+	public static String curDir = "right";
 	public static String[][] grid = new String[13][29];
+	public static int points = 0;
+	
 	
 	public static void main(String[] args) {
 		//sets up keylistener
@@ -25,19 +27,24 @@ public class Snake implements KeyListener{
 		}
 		
 		int[] randStart = getRandomCoords();
-		
-		Head head = new Head(randStart[0], randStart[1]); 
+		Head head = new Head(randStart[0], randStart[1]);
+		genRandApple();
 		
 		while(true) {
 			printGrid();
 			head.move();
-			wait(500);
+			wait(300);
 		}
 		
 		
 		
 		
 		
+	}
+	
+	public static void genRandApple() {
+		int[] randAppleCoords = getRandomCoords();
+		grid[randAppleCoords[0]][randAppleCoords[1]] = "A";
 	}
 	
 	public static void wait(int ms)
@@ -80,7 +87,7 @@ public class Snake implements KeyListener{
 			for(int k = 0; k < grid.length*4.4+1; k++) System.out.print("-");
 			System.out.println();
 		}
-
+		System.out.println("Points: " + Snake.points);
 	}
 	
 	public Snake() {
@@ -104,7 +111,12 @@ public class Snake implements KeyListener{
     }
 	
 	private void changeDirection(String newDir) {
-        if(!curDir.equals(newDir)) {
+        if(curDir.equals(newDir) || (curDir.equals("left") && newDir.equals("right"))
+        		|| (curDir.equals("right") && newDir.equals("left"))
+        		|| (curDir.equals("up") && newDir.equals("down"))
+        		|| (curDir.equals("down") && newDir.equals("up"))) {
+        	
+        } else {
         	curDir = newDir;
         }
     	
@@ -128,11 +140,17 @@ class SnakeBody {
 	SnakeBody next;
 	String character;
 	
-	public SnakeBody(int row, int col, SnakeBody pointer) {
+	public SnakeBody(int row, int col) {
 		curRow = row;
 		curCol = col;
-		next = pointer;
 		character = "#";
+	}
+	
+	public void move(int newRow, int newCol) {
+		curRow = newRow;
+		curCol = newCol;
+		Snake.grid[newRow][newCol] = character;
+		Snake.grid[curRow][curCol] = " ";
 	}
 	
 }
@@ -141,6 +159,10 @@ class Head {
 	int curRow;
 	int curCol;
 	String character;
+	SnakeBody next;
+	
+	public static int length = 1;
+	
 	
 	public Head(int row, int col) {
 		curRow = row;
@@ -149,8 +171,15 @@ class Head {
 		Snake.grid[row][col] = character;
 	}
 	
+	public void eatApple(SnakeBody tail) {
+		//curBody now equals the tail end of the snake
+	}
+	
+	
 	public void move() {
 		String dir = Snake.curDir;
+		int oldRow = curRow;
+		int oldCol = curCol;		
 		
 		Snake.grid[curRow][curCol] = " ";
 		
@@ -164,7 +193,25 @@ class Head {
 			curRow = (curRow+1)%Snake.grid.length;
 		}
 		
+		//if apple is eaten
+		
+		
+		
+		SnakeBody curBody = next;
+		while(curBody != null) {
+			curBody.move(oldRow, oldCol);			
+			curBody = next.next;
+		}
+		//curBody now equals the tail end of the snake
+		
+		if(Snake.grid[curRow][curCol].equals("A")) {
+			Snake.points++;
+			Snake.genRandApple();
+			eatApple(curBody);
+		}
 		Snake.grid[curRow][curCol] = character;
+		
+
 	}
 	
 }
