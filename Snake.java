@@ -33,7 +33,7 @@ public class Snake implements KeyListener{
 		while(true) {
 			printGrid();
 			head.move();
-			wait(300);
+			wait(200);
 		}
 		
 		
@@ -144,13 +144,14 @@ class SnakeBody {
 		curRow = row;
 		curCol = col;
 		character = "#";
+		Snake.grid[row][col] = character;
 	}
 	
 	public void move(int newRow, int newCol) {
+		Snake.grid[curRow][curCol] = " ";
+		Snake.grid[newRow][newCol] = character;
 		curRow = newRow;
 		curCol = newCol;
-		Snake.grid[newRow][newCol] = character;
-		Snake.grid[curRow][curCol] = " ";
 	}
 	
 }
@@ -171,8 +172,19 @@ class Head {
 		Snake.grid[row][col] = character;
 	}
 	
-	public void eatApple(SnakeBody tail) {
-		//curBody now equals the tail end of the snake
+	public void eatApple(SnakeBody tail, int row, int col) {
+		int len = length;
+		
+		if(len == 1) {
+			next = new SnakeBody(row, col);
+		}
+		else {
+			tail = new SnakeBody(row, col);
+		}
+		
+		length++;
+		
+		
 	}
 	
 	
@@ -181,8 +193,10 @@ class Head {
 		int oldRow = curRow;
 		int oldCol = curCol;		
 		
+		//sets grid at current pos to blank
 		Snake.grid[curRow][curCol] = " ";
 		
+		//finds new location of head
 		if(dir.equals("right")) {
 			curCol = (curCol+1)%Snake.grid[0].length;
 		} else if(dir.equals("left")) {
@@ -193,25 +207,25 @@ class Head {
 			curRow = (curRow+1)%Snake.grid.length;
 		}
 		
-		//if apple is eaten
-		
-		
-		
+		//sets curBody equal to tail end of snake and gets pre move position of tail
 		SnakeBody curBody = next;
+		int prevRow = oldRow;
+		int prevCol = oldCol;
 		while(curBody != null) {
-			curBody.move(oldRow, oldCol);			
-			curBody = next.next;
+			curBody.move(prevRow, prevCol);
+			prevRow = curBody.curRow;
+			prevCol = curBody.curCol;
+			curBody = curBody.next;
 		}
-		//curBody now equals the tail end of the snake
 		
+		//if head is going to land on apple
 		if(Snake.grid[curRow][curCol].equals("A")) {
 			Snake.points++;
+			eatApple(curBody, prevRow, prevCol);
 			Snake.genRandApple();
-			eatApple(curBody);
 		}
 		Snake.grid[curRow][curCol] = character;
 		
-
 	}
 	
 }
