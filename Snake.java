@@ -1,3 +1,5 @@
+package fun;
+
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.KeyEvent;
@@ -11,7 +13,7 @@ public class Snake implements KeyListener{
 	public static String curDir = "right";
 	public static String[][] grid = new String[13][29];
 	public static int points = 0;
-	
+	public static boolean gameOver = false;
 	
 	public static void main(String[] args) {
 		//sets up keylistener
@@ -28,10 +30,11 @@ public class Snake implements KeyListener{
 		Head head = new Head(randStart[0], randStart[1]);
 		genRandApple();
 		
-		while(true) {
+		while(!gameOver) {
 			printGrid();
-			head.move();
+			gameOver = head.move();
 			wait(200);
+			
 		}
 		
 		
@@ -73,6 +76,13 @@ public class Snake implements KeyListener{
 	
 	public static void printGrid() {
 		for(int i = 0; i < 50; i++) System.out.println();
+		for(int i = 0; i < grid[0].length; i++) {
+			if(i<10)
+				System.out.print(" " + i);
+			else
+				System.out.print(i);
+		}
+		System.out.println();
 		for(int i = 0; i < grid.length*4.4+1; i++) System.out.print("-");
 		System.out.println();
 		for(int i = 0; i < grid.length; i++) {
@@ -81,7 +91,7 @@ public class Snake implements KeyListener{
 				line += grid[i][j];
 				line += "|";
 			}
-			System.out.println(line);
+			System.out.println(line + " " + i);
 			for(int k = 0; k < grid.length*4.4+1; k++) System.out.print("-");
 			System.out.println();
 		}
@@ -135,6 +145,8 @@ class SnakeBody {
 	
 	int curRow;
 	int curCol;
+	int oldRow;
+	int oldCol;
 	SnakeBody next;
 	String character;
 	
@@ -148,6 +160,8 @@ class SnakeBody {
 	public void move(int newRow, int newCol) {
 		Snake.grid[curRow][curCol] = " ";
 		Snake.grid[newRow][newCol] = character;
+		oldRow = curRow;
+		oldCol = curCol;
 		curRow = newRow;
 		curCol = newCol;
 	}
@@ -186,7 +200,7 @@ class Head {
 	}
 	
 	
-	public void move() {
+	public boolean move() {
 		String dir = Snake.curDir;
 		int oldRow = curRow;
 		int oldCol = curCol;		
@@ -205,15 +219,18 @@ class Head {
 			curRow = (curRow+1)%Snake.grid.length;
 		}
 		
+		if(Snake.grid[curRow][curCol].equals("A")) {
+			int l = 0;
+		}
 		//sets curBody equal to tail end of snake and gets pre move position of tail
 		SnakeBody curBody = next;
 		int prevRow = oldRow;
 		int prevCol = oldCol;
-		SnakeBody prevBody = null;
+		SnakeBody prevBody = curBody;
 		while(curBody != null) {
 			curBody.move(prevRow, prevCol);
-			prevRow = curBody.curRow;
-			prevCol = curBody.curCol;
+			prevRow = curBody.oldRow;
+			prevCol = curBody.oldCol;
 			prevBody = curBody;
 			curBody = curBody.next;
 		}
@@ -221,20 +238,16 @@ class Head {
 		//if head is going to land on apple
 		if(Snake.grid[curRow][curCol].equals("A")) {
 			Snake.points++;
-			if(dir.equals("right")) {
-				prevCol--;
-			} else if(dir.equals("left")) {
-				prevCol++;
-			}else if(dir.equals("up")) {
-				prevRow++;
-			}else {
-				prevRow--;
-			}
 			eatApple(curBody, prevBody, prevRow, prevCol);
 			Snake.genRandApple();
 		}
-		Snake.grid[curRow][curCol] = character;
+		else if(Snake.grid[curRow][curCol].equals("A")) {
+			System.out.println("Game over!");
+			return true;
+		}
 		
+		Snake.grid[curRow][curCol] = character;
+		return false;
 	}
 	
 }
