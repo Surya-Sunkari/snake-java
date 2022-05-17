@@ -1,5 +1,3 @@
-package fun;
-
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.KeyEvent;
@@ -172,14 +170,14 @@ class Head {
 		Snake.grid[row][col] = character;
 	}
 	
-	public void eatApple(SnakeBody tail, int row, int col) {
+	public void eatApple(SnakeBody tail, SnakeBody prev, int row, int col) {
 		int len = length;
 		
 		if(len == 1) {
 			next = new SnakeBody(row, col);
 		}
 		else {
-			tail = new SnakeBody(row, col);
+			prev.next = new SnakeBody(row, col);
 		}
 		
 		length++;
@@ -211,17 +209,28 @@ class Head {
 		SnakeBody curBody = next;
 		int prevRow = oldRow;
 		int prevCol = oldCol;
+		SnakeBody prevBody = null;
 		while(curBody != null) {
 			curBody.move(prevRow, prevCol);
 			prevRow = curBody.curRow;
 			prevCol = curBody.curCol;
+			prevBody = curBody;
 			curBody = curBody.next;
 		}
 		
 		//if head is going to land on apple
 		if(Snake.grid[curRow][curCol].equals("A")) {
 			Snake.points++;
-			eatApple(curBody, prevRow, prevCol);
+			if(dir.equals("right")) {
+				prevCol--;
+			} else if(dir.equals("left")) {
+				prevCol++;
+			}else if(dir.equals("up")) {
+				prevRow++;
+			}else {
+				prevRow--;
+			}
+			eatApple(curBody, prevBody, prevRow, prevCol);
 			Snake.genRandApple();
 		}
 		Snake.grid[curRow][curCol] = character;
